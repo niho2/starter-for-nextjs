@@ -1,4 +1,5 @@
 import { getLoggedInUser } from "@/lib/server/appwrite";
+import { initializeUser } from "@/lib/server/friend-actions";
 import { redirect } from "next/navigation";
 import { signOut } from "@/lib/server/auth-actions";
 import {
@@ -20,6 +21,9 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { EmailVerificationButton } from "@/components/auth/email-verification-button";
+import { FriendSystem } from "@/components/friend-system";
+import DrinkSystem from "@/components/drink-system";
+import { Navigation } from "@/components/navigation";
 
 interface AccountPageProps {
   searchParams: Promise<{ error?: string; success?: string }>;
@@ -29,19 +33,30 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
   const user = await getLoggedInUser();
   if (!user) redirect("/signin");
 
+  // Initialize user profile for friend system
+  await initializeUser();
+
   const { error, success } = await searchParams;
 
   return (
     <div className="min-h-screen  py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
+        <Navigation />
         <div className="space-y-6">
           <div className="text-center">
             <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
               Mein Konto
             </h1>
             <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
-              Verwalten Sie Ihre Kontoinformationen
+              Verwalten Sie Ihre Kontoinformationen und Freundschaften
             </p>
+            <div className="mt-4">
+              <Button asChild variant="outline" size="sm">
+                <a href="/messaging">
+                  📱 Push Notifications & Friend System Overview
+                </a>
+              </Button>
+            </div>
           </div>
 
           {/* Success/Error Messages */}
@@ -178,6 +193,12 @@ export default async function AccountPage({ searchParams }: AccountPageProps) {
               </form>
             </CardContent>
           </Card>
+
+          {/* Drink System */}
+          <DrinkSystem currentUserId={user.$id} />
+
+          {/* Friends and Push Notifications System */}
+          <FriendSystem />
         </div>
       </div>
     </div>
